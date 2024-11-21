@@ -37,21 +37,6 @@ class _LearningMethodsPageState extends State<LearningMethodsPage> {
       "description":
           "Metode SQ3R adalah metode membaca yang mencakup langkah-langkah Survey, Question, Read, Recite, dan Review. Tujuannya adalah untuk memahami dan mengingat informasi secara lebih efisien, dengan memfokuskan pembaca pada hal-hal yang paling penting.\n\nManfaat:\n- Efektivitas Membaca\n- Memperbaiki Pengingatan\n- Meningkatkan Kecepatan Membaca"
     },
-    {
-      "title": "Fokus pada Satu Topik",
-      "description":
-          "Belajar dengan fokus pada satu topik per hari mengurangi kelelahan mental dan memungkinkan pemahaman yang lebih baik. Dengan menghindari multitasking, Anda dapat mendedikasikan waktu lebih lama untuk mempelajari dan memahami satu topik secara mendalam.\n\nManfaat:\n- Mengurangi Kelelahan Mental\n- Meningkatkan Pemahaman\n- Efisien Waktu"
-    },
-    {
-      "title": "Catatan Tulisan Tangan",
-      "description":
-          "Menulis catatan dengan tangan lebih efektif daripada mengetik di komputer. Menulis secara manual membantu meningkatkan daya ingat dan pemahaman konsep, karena proses menulis memperkuat koneksi otak.\n\nManfaat:\n- Meningkatkan Daya Ingat\n- Meningkatkan Pemahaman\n- Fokus dan Tanpa Gangguan"
-    },
-    {
-      "title": "Study Before Bed",
-      "description":
-          "Belajar sebelum tidur membantu otak mengorganisasi informasi yang telah dipelajari. Proses pembelajaran saat tidur meningkatkan retensi dan memperkuat koneksi antara pengetahuan yang baru dipelajari dengan pengetahuan yang sudah ada.\n\nManfaat:\n- Memperkuat Ingatan\n- Meningkatkan Konsolidasi Memori\n- Efektif untuk Mengingat"
-    },
   ];
 
   @override
@@ -78,6 +63,7 @@ class _LearningMethodsPageState extends State<LearningMethodsPage> {
             child: PageView.builder(
               controller: _pageController,
               itemCount: learningMethods.length,
+              physics: const BouncingScrollPhysics(), // Enable swipe
               onPageChanged: (int index) {
                 setState(() {
                   _currentIndex = index;
@@ -87,45 +73,61 @@ class _LearningMethodsPageState extends State<LearningMethodsPage> {
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24.0),
                   child: Center(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFF9754), // Bright orange color
-                        borderRadius: BorderRadius.circular(30),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Colors.black45,
-                            blurRadius: 12,
-                            offset: Offset(0, 6),
-                          ),
-                        ],
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-                      child: Column(
-                        children: [
-                          Row(
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque, // Allow swipes to pass through
+                      onHorizontalDragUpdate: (details) {
+                        // Enable swipe gestures for PageView
+                        _pageController.position.moveTo(
+                          _pageController.position.pixels - details.delta.dx,
+                        );
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFF9754), // Bright orange color
+                          borderRadius: BorderRadius.circular(30),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black45,
+                              blurRadius: 12,
+                              offset: Offset(0, 6),
+                            ),
+                          ],
+                        ),
+                        padding: const EdgeInsets.all(16),
+                        child: SingleChildScrollView(
+                          physics: const BouncingScrollPhysics(),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Icon(Icons.lightbulb, color: Colors.white),
-                              const SizedBox(width: 8),
+                              Row(
+                                children: [
+                                  const Icon(Icons.lightbulb, color: Colors.white),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      learningMethods[index]['title']!,
+                                      style: const TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
                               Text(
-                                learningMethods[index]['title']!,
+                                learningMethods[index]['description']!,
                                 style: const TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                                  fontSize: 16, // Slightly smaller font for readability
+                                  color: Colors.black87,
+                                  height: 1.5, // Better line height
                                 ),
+                                textAlign: TextAlign.justify, // Justified alignment for cleaner look
                               ),
                             ],
                           ),
-                          const SizedBox(height: 16),
-                          Text(
-                            learningMethods[index]['description']!,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              color: Colors.black87,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
@@ -157,4 +159,10 @@ class _LearningMethodsPageState extends State<LearningMethodsPage> {
       ),
     );
   }
+}
+
+void main() {
+  runApp(const MaterialApp(
+    home: LearningMethodsPage(),
+  ));
 }
