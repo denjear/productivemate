@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'learning_methods_page.dart'; // Tambahkan import untuk halaman metode belajar
 import 'task_list_page.dart'; // Tambahkan import untuk halaman metode belajar
+import 'timer_page.dart';
 
 void main() {
   runApp(ProductivityApp());
@@ -55,7 +56,13 @@ class ProductivityHomePage extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        // Navigate to the PomodoroTimer page
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => TimerPage()),
+                        );
+                      },
                       icon: const Icon(Icons.play_arrow),
                       label: const Text("Mulai Produktif"),
                       style: ElevatedButton.styleFrom(
