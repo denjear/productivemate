@@ -1,4 +1,4 @@
-# productivity_mate
+# ProductiveMate
 
 A new Flutter project.
 
