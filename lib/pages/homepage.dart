@@ -98,11 +98,12 @@ class ProductivityHomePage extends StatelessWidget {
         ],
       ),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView( // Wrap the entire body in a scroll view
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // User greeting section
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16.0),
@@ -252,6 +253,7 @@ class ProductivityHomePage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
+              // Learn more section
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),

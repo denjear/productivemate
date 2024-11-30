@@ -97,15 +97,14 @@ class _TimeTrackerPageState extends State<TimeTrackerPage> {
     });
   }
 
-// Function to calculate the total duration of all activities for a day
-int _getTotalDurationForDay(int day) {
-  num total = 0; // Use num to allow for both int and double
-  for (var activity in activitiesByDay[day] ?? []) {
-    total += activity.duration;
+  // Function to calculate the total duration of all activities for a day
+  int _getTotalDurationForDay(int day) {
+    num total = 0; // Use num to allow for both int and double
+    for (var activity in activitiesByDay[day] ?? []) {
+      total += activity.duration;
+    }
+    return total.toInt(); // Explicitly cast total to an int before returning
   }
-  return total.toInt(); // Explicitly cast total to an int before returning
-}
-
 
   // Function to get the pie chart angles for a selected day
   List<double> _getPieChartAnglesForDay(int day) {
@@ -148,7 +147,7 @@ int _getTotalDurationForDay(int day) {
         elevation: 0,
         centerTitle: true,
       ),
-      body: Padding(
+      body: SingleChildScrollView( // Wrap the entire body in a scroll view
         padding: EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -242,36 +241,38 @@ int _getTotalDurationForDay(int day) {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFFFC8F54)),
             ),
             SizedBox(height: 8),
-            Expanded(
-              child: ListView.builder(
-                itemCount: activitiesByDay[selectedDay]?.length ?? 0,
-                itemBuilder: (context, index) {
-                  return Card(
-                    color: Color(0xFFFDE7BB),
-                    child: ListTile(
-                      title: Text(activitiesByDay[selectedDay]![index].name),
-                      subtitle: Text(
-                        '${activitiesByDay[selectedDay]![index].duration} Menit',
-                        style: TextStyle(fontSize: 14, color: Colors.grey),
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: Icon(Icons.edit),
-                            onPressed: () => _editActivity(selectedDay, index),
+            activitiesByDay[selectedDay] == null || activitiesByDay[selectedDay]!.isEmpty
+                ? Center(child: Text('Tidak ada aktivitas untuk ditampilkan'))
+                : ListView.builder(
+                    shrinkWrap: true, // Add shrinkWrap here to ensure the list does not overflow
+                    physics: NeverScrollableScrollPhysics(), // Disable scrolling for this ListView
+                    itemCount: activitiesByDay[selectedDay]?.length ?? 0,
+                    itemBuilder: (context, index) {
+                      return Card(
+                        color: Color(0xFFFDE7BB),
+                        child: ListTile(
+                          title: Text(activitiesByDay[selectedDay]![index].name),
+                          subtitle: Text(
+                            '${activitiesByDay[selectedDay]![index].duration} Menit',
+                            style: TextStyle(fontSize: 14, color: Colors.grey),
                           ),
-                          IconButton(
-                            icon: Icon(Icons.delete),
-                            onPressed: () => _deleteActivity(selectedDay, index),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: Icon(Icons.edit),
+                                onPressed: () => _editActivity(selectedDay, index),
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.delete),
+                                onPressed: () => _deleteActivity(selectedDay, index),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
+                        ),
+                      );
+                    },
+                  ),
           ],
         ),
       ),
