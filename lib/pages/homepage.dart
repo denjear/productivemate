@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'learning_methods_page.dart'; // Tambahkan import untuk halaman metode belajar
-import 'task_list_page.dart'; // Tambahkan import untuk halaman daftar tugas
+import 'learning_methods_page.dart'; // Import Learning Methods Page
+import 'task_list_page.dart'; // Import Task List Page
 import 'timer_page.dart';
-import 'settings_page.dart'; // Tambahkan import untuk halaman SettingsPage
+import 'settings_page.dart'; // Import Settings Page
+import 'time_tracker_page.dart'; // Import Time Tracker Page
 
 void main() {
   runApp(ProductivityApp());
@@ -17,51 +18,51 @@ class ProductivityApp extends StatefulWidget {
 }
 
 class _ProductivityAppState extends State<ProductivityApp> {
-  bool _isDarkMode = false; // Variabel untuk menyimpan status Dark Mode
+  bool _isDarkMode = false; // Variable for Dark Mode status
 
   @override
   void initState() {
     super.initState();
-    _loadSettings(); // Memuat pengaturan Dark Mode dari SharedPreferences
+    _loadSettings(); // Load Dark Mode settings from SharedPreferences
   }
 
-  // Memuat pengaturan Dark Mode dari SharedPreferences
+  // Load Dark Mode settings from SharedPreferences
   void _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _isDarkMode = prefs.getBool('isDarkMode') ?? false; // Mendapatkan pengaturan Dark Mode
+      _isDarkMode = prefs.getBool('isDarkMode') ?? false; // Get Dark Mode setting
     });
   }
 
-  // Tema Light Mode
+  // Light Mode Theme
   ThemeData _lightTheme() {
     return ThemeData(
       brightness: Brightness.light,
-      primaryColor: Colors.blue, // Warna utama untuk Light Mode
-      scaffoldBackgroundColor: Colors.white, // Latar belakang untuk Scaffold
+      primaryColor: Colors.blue, // Main color for Light Mode
+      scaffoldBackgroundColor: Colors.white, // Scaffold background color
       appBarTheme: AppBarTheme(
-        color: Colors.blue, // Warna AppBar untuk Light Mode
+        color: Colors.blue, // AppBar color for Light Mode
       ),
       textTheme: TextTheme(
-        bodyLarge: TextStyle(color: Colors.black), // Menggunakan bodyLarge
+        bodyLarge: TextStyle(color: Colors.black), // Using bodyLarge
       ),
-      iconTheme: IconThemeData(color: Colors.black), // Ikon berwarna hitam
+      iconTheme: IconThemeData(color: Colors.black), // Black icons
     );
   }
 
-  // Tema Dark Mode
+  // Dark Mode Theme
   ThemeData _darkTheme() {
     return ThemeData(
       brightness: Brightness.dark,
-      primaryColor: Colors.blueGrey, // Warna utama untuk Dark Mode
-      scaffoldBackgroundColor: Colors.black, // Latar belakang untuk Scaffold
+      primaryColor: Colors.blueGrey, // Main color for Dark Mode
+      scaffoldBackgroundColor: Colors.black, // Scaffold background color
       appBarTheme: AppBarTheme(
-        color: Colors.blueGrey, // Warna AppBar untuk Dark Mode
+        color: Colors.blueGrey, // AppBar color for Dark Mode
       ),
       textTheme: TextTheme(
-        bodyLarge: TextStyle(color: Colors.white), // Menggunakan bodyLarge
+        bodyLarge: TextStyle(color: Colors.white), // Using bodyLarge
       ),
-      iconTheme: IconThemeData(color: Colors.white), // Ikon berwarna putih
+      iconTheme: IconThemeData(color: Colors.white), // White icons
     );
   }
 
@@ -69,10 +70,11 @@ class _ProductivityAppState extends State<ProductivityApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: _isDarkMode ? _darkTheme() : _lightTheme(), // Pilih tema berdasarkan pengaturan
-      home: const ProductivityHomePage(), // Halaman utama
+      theme: _isDarkMode ? _darkTheme() : _lightTheme(), // Choose theme based on settings
+      home: const ProductivityHomePage(), // Main page
       routes: {
-        '/settings': (context) => const SettingsPage(), // Rute ke halaman Settings
+        '/settings': (context) => const SettingsPage(), // Route to Settings Page
+        '/timeTracker': (context) => TimeTrackerPage(), // Route to Time Tracker Page
       },
     );
   }
@@ -90,7 +92,7 @@ class ProductivityHomePage extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
-              Navigator.pushNamed(context, '/settings'); // Akses halaman Settings
+              Navigator.pushNamed(context, '/settings'); // Navigate to Settings Page
             },
           ),
         ],
@@ -285,7 +287,23 @@ class ProductivityHomePage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(30),
                         ),
                       ),
-                      child: Text("Metode Belajar"),
+                      child: const Text("Metode Belajar"),
+                    ),
+                    const SizedBox(height: 16),
+                    // Add button to navigate to TimeTrackerPage
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/timeTracker');
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                      child: const Text("Buka Time Tracker"),
                     ),
                   ],
                 ),
