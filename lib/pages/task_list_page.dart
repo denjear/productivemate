@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'add_task_page.dart';
 
 class TaskListPage extends StatelessWidget {
   const TaskListPage({Key? key}) : super(key: key);
@@ -17,7 +18,10 @@ class TaskListPage extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.add, color: Colors.black),
             onPressed: () {
-              // Handle add task action
+              Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => AddTaskPage()),
+                        );
             },
           ),
         ],
