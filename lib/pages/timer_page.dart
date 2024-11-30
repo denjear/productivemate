@@ -1,12 +1,15 @@
+import 'dart:async'; // Pastikan ini ada
+
 import 'package:flutter/material.dart';
-import 'dart:async';
 
 class TimerPage extends StatefulWidget {
+  const TimerPage({Key? key}) : super(key: key);  // Menambahkan super.key untuk konstruktor
+
   @override
-  _TimerPageState createState() => _TimerPageState();
+  TimerPageState createState() => TimerPageState();  // Menggunakan TimerPageState yang publik
 }
 
-class _TimerPageState extends State<TimerPage> {
+class TimerPageState extends State<TimerPage> {
   int remainingTime = 1500; // 25 minutes in seconds
   Timer? timer;
   bool isRunning = false;
@@ -32,7 +35,7 @@ class _TimerPageState extends State<TimerPage> {
           } else {
             timer.cancel();
             isRunning = false;
-            String sessionType = isBreak ? "Break" : "Session";
+            String sessionType = isBreak ? "Break" : "Session"; // Menggunakan sessionType
             sessionRecords.add(
                 "$sessionType ${(remainingTime ~/ 60).toString().padLeft(2, '0')}:${(remainingTime % 60).toString().padLeft(2, '0')}");
             isBreak = !isBreak;

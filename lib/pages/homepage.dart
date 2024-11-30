@@ -1,20 +1,79 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'learning_methods_page.dart'; // Tambahkan import untuk halaman metode belajar
-import 'task_list_page.dart'; // Tambahkan import untuk halaman metode belajar
+import 'task_list_page.dart'; // Tambahkan import untuk halaman daftar tugas
 import 'timer_page.dart';
+import 'settings_page.dart'; // Tambahkan import untuk halaman SettingsPage
 
 void main() {
   runApp(ProductivityApp());
 }
 
-class ProductivityApp extends StatelessWidget {
+class ProductivityApp extends StatefulWidget {
   const ProductivityApp({super.key});
+
+  @override
+  _ProductivityAppState createState() => _ProductivityAppState();
+}
+
+class _ProductivityAppState extends State<ProductivityApp> {
+  bool _isDarkMode = false; // Variabel untuk menyimpan status Dark Mode
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings(); // Memuat pengaturan Dark Mode dari SharedPreferences
+  }
+
+  // Memuat pengaturan Dark Mode dari SharedPreferences
+  void _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _isDarkMode = prefs.getBool('isDarkMode') ?? false; // Mendapatkan pengaturan Dark Mode
+    });
+  }
+
+  // Tema Light Mode
+  ThemeData _lightTheme() {
+    return ThemeData(
+      brightness: Brightness.light,
+      primaryColor: Colors.blue, // Warna utama untuk Light Mode
+      scaffoldBackgroundColor: Colors.white, // Latar belakang untuk Scaffold
+      appBarTheme: AppBarTheme(
+        color: Colors.blue, // Warna AppBar untuk Light Mode
+      ),
+      textTheme: TextTheme(
+        bodyLarge: TextStyle(color: Colors.black), // Menggunakan bodyLarge
+      ),
+      iconTheme: IconThemeData(color: Colors.black), // Ikon berwarna hitam
+    );
+  }
+
+  // Tema Dark Mode
+  ThemeData _darkTheme() {
+    return ThemeData(
+      brightness: Brightness.dark,
+      primaryColor: Colors.blueGrey, // Warna utama untuk Dark Mode
+      scaffoldBackgroundColor: Colors.black, // Latar belakang untuk Scaffold
+      appBarTheme: AppBarTheme(
+        color: Colors.blueGrey, // Warna AppBar untuk Dark Mode
+      ),
+      textTheme: TextTheme(
+        bodyLarge: TextStyle(color: Colors.white), // Menggunakan bodyLarge
+      ),
+      iconTheme: IconThemeData(color: Colors.white), // Ikon berwarna putih
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: ProductivityHomePage(),
+      theme: _isDarkMode ? _darkTheme() : _lightTheme(), // Pilih tema berdasarkan pengaturan
+      home: const ProductivityHomePage(), // Halaman utama
+      routes: {
+        '/settings': (context) => const SettingsPage(), // Rute ke halaman Settings
+      },
     );
   }
 }
@@ -25,7 +84,17 @@ class ProductivityHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text("Productivity App"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.pushNamed(context, '/settings'); // Akses halaman Settings
+            },
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -36,9 +105,8 @@ class ProductivityHomePage extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  color: Colors.yellow[100]
-                ),
+                    borderRadius: BorderRadius.circular(16),
+                    color: Colors.yellow[100]),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -57,7 +125,6 @@ class ProductivityHomePage extends StatelessWidget {
                     const SizedBox(height: 16),
                     ElevatedButton.icon(
                       onPressed: () {
-                        // Navigate to the PomodoroTimer page
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => TimerPage()),
@@ -68,7 +135,8 @@ class ProductivityHomePage extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.black,
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
                         ),
@@ -107,7 +175,6 @@ class ProductivityHomePage extends StatelessWidget {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-
                             Text(
                               "Dasar Pemrograman",
                               style: TextStyle(fontSize: 12),
@@ -120,7 +187,6 @@ class ProductivityHomePage extends StatelessWidget {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-
                             Text(
                               "• Mengerjakan soal OOP\n• Latihan UTS",
                               style: TextStyle(fontSize: 12),
@@ -203,7 +269,6 @@ class ProductivityHomePage extends StatelessWidget {
                     const SizedBox(height: 8),
                     ElevatedButton(
                       onPressed: () {
-                        // Tambahkan navigasi ke halaman metode belajar
                         Navigator.push(
                           context,
                           MaterialPageRoute(
