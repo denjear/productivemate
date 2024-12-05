@@ -1,5 +1,6 @@
 import 'dart:math'; // Importing math for angle calculations
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Import SharedPreferences
 
 void main() {
   runApp(MaterialApp(
@@ -13,15 +14,48 @@ class TimeTrackerPage extends StatefulWidget {
 }
 
 class _TimeTrackerPageState extends State<TimeTrackerPage> {
-  // Map to store activities for each day of the month (1 to 31)
-  Map<int, List<Activity>> activitiesByDay = {};
-
-  // Controllers for adding new activities
+  Map<int, List<Activity>> activitiesByDay = {}; // Store activities
   final _activityController = TextEditingController();
   final _durationController = TextEditingController();
-  int selectedDay = 1; // Default to day 1
+  int selectedDay = 1;
 
-  // Function to add activity to the selected day
+  @override
+  void initState() {
+    super.initState();
+    _loadActivitiesFromPreferences(); // Load activities when the page is opened
+  }
+
+  // Function to save activities to SharedPreferences
+  void _saveActivitiesToPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Convert activities map to a list of strings for simplicity
+    List<String> activitiesList = activitiesByDay[selectedDay]!.map((activity) {
+      return '${activity.name}:${activity.duration}'; // Format as 'activityName:duration'
+    }).toList();
+
+    await prefs.setStringList('activities_day_$selectedDay', activitiesList);
+  }
+
+  // Function to load activities from SharedPreferences
+  void _loadActivitiesFromPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String>? savedActivities = prefs.getStringList('activities_day_$selectedDay');
+
+    if (savedActivities != null) {
+      setState(() {
+        activitiesByDay[selectedDay] = savedActivities.map((activityStr) {
+          final parts = activityStr.split(':');
+          return Activity(
+            name: parts[0],
+            duration: int.parse(parts[1]),
+          );
+        }).toList();
+      });
+    }
+  }
+
+  // Function to add activity
   void _addActivity() {
     if (_activityController.text.isNotEmpty && _durationController.text.isNotEmpty) {
       setState(() {
@@ -33,6 +67,7 @@ class _TimeTrackerPageState extends State<TimeTrackerPage> {
           duration: int.tryParse(_durationController.text) ?? 0,
         ));
       });
+      _saveActivitiesToPreferences(); // Save the new data to SharedPreferences
       _activityController.clear();
       _durationController.clear();
     }
@@ -70,6 +105,7 @@ class _TimeTrackerPageState extends State<TimeTrackerPage> {
                     duration: int.tryParse(_durationController.text) ?? 0,
                   );
                 });
+                _saveActivitiesToPreferences(); // Save the updated data
                 Navigator.of(context).pop();
                 _activityController.clear();
                 _durationController.clear();
@@ -95,15 +131,16 @@ class _TimeTrackerPageState extends State<TimeTrackerPage> {
     setState(() {
       activitiesByDay[day]!.removeAt(index);
     });
+    _saveActivitiesToPreferences(); // Save after deleting activity
   }
 
   // Function to calculate the total duration of all activities for a day
   int _getTotalDurationForDay(int day) {
-    num total = 0; // Use num to allow for both int and double
+    num total = 0;
     for (var activity in activitiesByDay[day] ?? []) {
       total += activity.duration;
     }
-    return total.toInt(); // Explicitly cast total to an int before returning
+    return total.toInt();
   }
 
   // Function to get the pie chart angles for a selected day
@@ -121,7 +158,7 @@ class _TimeTrackerPageState extends State<TimeTrackerPage> {
     return angles;
   }
 
-  // Function to get the colors for each activity (keep original colors for pie chart)
+  // Function to get the colors for each activity (for pie chart)
   List<Color> _getColorsForChart() {
     return [
       Color(0xFFAA5486),
@@ -136,6 +173,7 @@ class _TimeTrackerPageState extends State<TimeTrackerPage> {
     setState(() {
       selectedDay = day;
     });
+    _loadActivitiesFromPreferences(); // Reload activities when day is changed
   }
 
   @override
@@ -143,16 +181,15 @@ class _TimeTrackerPageState extends State<TimeTrackerPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Time Tracker'),
-        backgroundColor: Color(0xFFFC8F54), // Primary color for the app bar
+        backgroundColor: Color(0xFFFC8F54),
         elevation: 0,
         centerTitle: true,
       ),
-      body: SingleChildScrollView( // Wrap the entire body in a scroll view
+      body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Day Selection
             Text(
               'Pilih Hari',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFFFC8F54)),
@@ -166,14 +203,12 @@ class _TimeTrackerPageState extends State<TimeTrackerPage> {
                   label: Text('$day'),
                   selected: selectedDay == day,
                   onSelected: (_) => _selectDay(day),
-                  selectedColor: Color(0xFFFBF4DB), // Lighter background for selected day
+                  selectedColor: Color(0xFFFBF4DB),
                   labelStyle: TextStyle(color: Colors.black),
                 );
               }),
             ),
             SizedBox(height: 24),
-
-            // Input Section for Activity
             Text(
               'Tambah Aktivitas untuk Hari $selectedDay',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFFFC8F54)),
@@ -185,7 +220,7 @@ class _TimeTrackerPageState extends State<TimeTrackerPage> {
                 labelText: 'Nama Aktivitas',
                 border: OutlineInputBorder(),
                 filled: true,
-                fillColor: Color(0xFFFBF4DB), // Background color for input fields
+                fillColor: Color(0xFFFBF4DB),
               ),
             ),
             SizedBox(height: 8),
@@ -203,14 +238,12 @@ class _TimeTrackerPageState extends State<TimeTrackerPage> {
             ElevatedButton(
               onPressed: _addActivity,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFFFC8F54), // Main color for the button
+                backgroundColor: Color(0xFFFC8F54),
                 padding: EdgeInsets.symmetric(vertical: 14),
               ),
               child: Text('Tambah Aktivitas'),
             ),
             SizedBox(height: 24),
-
-            // Pie chart visualization
             Text(
               'Visualisasi Waktu Aktivitas untuk Hari $selectedDay',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFFFC8F54)),
@@ -232,10 +265,7 @@ class _TimeTrackerPageState extends State<TimeTrackerPage> {
                   style: TextStyle(fontSize: 16, color: Colors.grey),
                 ),
               ),
-
             SizedBox(height: 24),
-
-            // List of activities for the selected day
             Text(
               'Daftar Aktivitas',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFFFC8F54)),
@@ -244,8 +274,8 @@ class _TimeTrackerPageState extends State<TimeTrackerPage> {
             activitiesByDay[selectedDay] == null || activitiesByDay[selectedDay]!.isEmpty
                 ? Center(child: Text('Tidak ada aktivitas untuk ditampilkan'))
                 : ListView.builder(
-                    shrinkWrap: true, // Add shrinkWrap here to ensure the list does not overflow
-                    physics: NeverScrollableScrollPhysics(), // Disable scrolling for this ListView
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
                     itemCount: activitiesByDay[selectedDay]?.length ?? 0,
                     itemBuilder: (context, index) {
                       return Card(
@@ -317,7 +347,6 @@ class PieChartPainter extends CustomPainter {
         paint,
       );
 
-      // Draw the label (name) for each segment
       final labelAngle = startAngle + sweepAngle / 2;
       final double x = size.width / 2 + (size.width / 4) * cos(_degToRad(labelAngle));
       final double y = size.height / 2 + (size.height / 4) * sin(_degToRad(labelAngle));
