@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'learning_methods_page.dart'; // Import Learning Methods Page
-import 'task_list_page.dart'; // Import Task List Page
-import 'timer_page.dart';
-import 'settings_page.dart'; // Import Settings Page
-import 'time_tracker_page.dart'; // Import Time Tracker Page
+import 'pages/learning_methods_page.dart'; // Import Learning Methods Page
+import 'pages/task_list_page.dart'; // Import Task List Page
+import 'pages/timer_page.dart';
+import 'pages/settings_page.dart'; // Import Settings Page
+import 'pages/time_tracker_page.dart'; // Import Time Tracker Page
 
 void main() {
   runApp(ProductivityApp());

@@ -8,7 +8,7 @@
             "name": "productivemate",
             "request": "launch",
             "type": "dart",
-            "program": "lib/pages/homepage.dart"
+            "program": "lib/main.dart"
         },
         {
             "name": "productivemate (profile mode)",
