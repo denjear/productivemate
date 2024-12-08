@@ -18,20 +18,17 @@ class ProductivityApp extends StatefulWidget {
 }
 
 class _ProductivityAppState extends State<ProductivityApp> {
-  bool _isDarkMode = false; // Variable for Dark Mode status
-
   @override
-  void initState() {
-    super.initState();
-    _loadSettings(); // Load Dark Mode settings from SharedPreferences
-  }
-
-  // Load Dark Mode settings from SharedPreferences
-  void _loadSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _isDarkMode = prefs.getBool('isDarkMode') ?? false; // Get Dark Mode setting
-    });
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: _lightTheme(), // Light Mode by default
+      home: const ProductivityHomePage(), // Main page
+      routes: {
+        '/settings': (context) => const SettingsPage(), // Route to Settings Page
+        '/timeTracker': (context) => TimeTrackerPage(), // Route to Time Tracker Page
+      },
+    );
   }
 
   // Light Mode Theme
@@ -49,39 +46,31 @@ class _ProductivityAppState extends State<ProductivityApp> {
       iconTheme: IconThemeData(color: Colors.black), // Black icons
     );
   }
-
-  // Dark Mode Theme
-  ThemeData _darkTheme() {
-    return ThemeData(
-      brightness: Brightness.dark,
-      primaryColor: Colors.blueGrey, // Main color for Dark Mode
-      scaffoldBackgroundColor: Colors.black, // Scaffold background color
-      appBarTheme: AppBarTheme(
-        color: Colors.blueGrey, // AppBar color for Dark Mode
-      ),
-      textTheme: TextTheme(
-        bodyLarge: TextStyle(color: Colors.white), // Using bodyLarge
-      ),
-      iconTheme: IconThemeData(color: Colors.white), // White icons
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: _isDarkMode ? _darkTheme() : _lightTheme(), // Choose theme based on settings
-      home: const ProductivityHomePage(), // Main page
-      routes: {
-        '/settings': (context) => const SettingsPage(), // Route to Settings Page
-        '/timeTracker': (context) => TimeTrackerPage(), // Route to Time Tracker Page
-      },
-    );
-  }
 }
 
-class ProductivityHomePage extends StatelessWidget {
+class ProductivityHomePage extends StatefulWidget {
   const ProductivityHomePage({super.key});
+
+  @override
+  _ProductivityHomePageState createState() => _ProductivityHomePageState();
+}
+
+class _ProductivityHomePageState extends State<ProductivityHomePage> {
+  String username = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUsername();
+  }
+
+  // Load username from SharedPreferences
+  Future<void> _loadUsername() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      username = prefs.getString('username') ?? 'Username'; // Default to 'Username' if not set
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -113,9 +102,9 @@ class ProductivityHomePage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      "Halo, username",
-                      style: TextStyle(
+                    Text(
+                      "Halo, $username", // Use the username here
+                      style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
