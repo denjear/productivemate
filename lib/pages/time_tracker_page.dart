@@ -238,8 +238,12 @@ class _TimeTrackerPageState extends State<TimeTrackerPage> {
             ElevatedButton(
               onPressed: _addActivity,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFFFC8F54),
-                padding: EdgeInsets.symmetric(vertical: 14),
+                backgroundColor: Color(0xFFFC8F54),  // Warna background oranye
+                foregroundColor: Colors.white,  // Warna teks putih
+                padding: EdgeInsets.symmetric(vertical: 18, horizontal: 20),  // Padding yang lebih besar
+                textStyle: TextStyle(  // Menambahkan style teks jika perlu
+                  fontSize: 16,  // Ukuran font
+                ),
               ),
               child: Text('Tambah Aktivitas'),
             ),

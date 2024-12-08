@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:productivity_mate/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';  // Import untuk SystemNavigator
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key});  // Menggunakan super.key untuk konstruktor
+  const SettingsPage({super.key});
 
   @override
-  SettingsPageState createState() => SettingsPageState();  // Gantilah menjadi SettingsPageState
+  SettingsPageState createState() => SettingsPageState();
 }
 
-class SettingsPageState extends State<SettingsPage> {  // Mengganti _SettingsPageState menjadi SettingsPageState
+class SettingsPageState extends State<SettingsPage> {
   bool _isDarkMode = false;
   String _language = 'English';
-  int _studyDuration = 1500; // Default: 25 minutes in seconds
-  int _breakDuration = 300; // Default: 5 minutes in seconds
+  int _studyDuration = 1500;
+  int _breakDuration = 300;
 
-  // Memuat pengaturan dari SharedPreferences
   void _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -25,41 +26,42 @@ class SettingsPageState extends State<SettingsPage> {  // Mengganti _SettingsPag
     });
   }
 
-  // Menyimpan pengaturan Dark Mode
   void _saveDarkMode(bool value) async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setBool('isDarkMode', value); // Menyimpan pengaturan Dark Mode
+    prefs.setBool('isDarkMode', value);
+
+    // Restart aplikasi setelah perubahan mode gelap/terang
+    SystemNavigator.pop();  // Menutup aplikasi
+    await Future.delayed(Duration(milliseconds: 500));  // Menunggu sebentar
+    runApp(ProductivityApp());  // Menjalankan kembali aplikasi dengan pengaturan baru
   }
 
-  // Menyimpan pengaturan bahasa
   void _saveLanguage(String language) async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setString('language', language);
   }
 
-  // Menyimpan pengaturan durasi timer
   void _saveTimerSettings(int studyDuration, int breakDuration) async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setInt('studyDuration', studyDuration);
     prefs.setInt('breakDuration', breakDuration);
   }
 
-  // Reset pengaturan ke default
   void _resetSettings() async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.clear(); // Menghapus semua pengaturan yang disimpan
+    prefs.clear();
     setState(() {
       _isDarkMode = false;
       _language = 'English';
-      _studyDuration = 1500; // Default: 25 menit
-      _breakDuration = 300; // Default: 5 menit
+      _studyDuration = 1500;
+      _breakDuration = 300;
     });
   }
 
   @override
   void initState() {
     super.initState();
-    _loadSettings(); // Memuat pengaturan saat halaman dimuat
+    _loadSettings();
   }
 
   @override
