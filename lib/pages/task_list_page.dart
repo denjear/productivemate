@@ -1,8 +1,36 @@
+import 'dart:convert'; // For JSON encoding/decoding
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'add_task_page.dart';
 
-class TaskListPage extends StatelessWidget {
+class TaskListPage extends StatefulWidget {
   const TaskListPage({Key? key}) : super(key: key);
+
+  @override
+  _TaskListPageState createState() => _TaskListPageState();
+}
+
+class _TaskListPageState extends State<TaskListPage> {
+  List<Map<String, dynamic>> tasks = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTasks();
+  }
+
+  Future<void> _loadTasks() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> tasksJson = prefs.getStringList('tasks') ?? [];
+    
+    setState(() {
+      tasks = tasksJson.map((taskJson) {
+        Map<String, dynamic> task = jsonDecode(taskJson);
+        task['deadline'] = DateTime.parse(task['deadline']);
+        return task;
+      }).toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,10 +46,13 @@ class TaskListPage extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.add, color: Colors.black),
             onPressed: () {
+              // Pass the refresh callback to AddTaskPage
               Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => AddTaskPage()),
-                        );
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AddTaskPage(onTaskAdded: _loadTasks),
+                ),
+              );
             },
           ),
         ],
@@ -33,43 +64,30 @@ class TaskListPage extends StatelessWidget {
           children: [
             const Text(
               "List Tugas dan Catatan",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
             ),
             const SizedBox(height: 20),
             Expanded(
               child: ListView.builder(
-                itemCount: 3,
+                itemCount: tasks.length,
                 itemBuilder: (context, index) {
+                  final task = tasks[index];
+                  final deadline = task['deadline'] as DateTime;
+                  
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 16.0),
                     child: Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFFF9C4),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                      decoration: BoxDecoration(color: const Color(0xFFFFF9C4), borderRadius: BorderRadius.circular(12)),
                       child: ListTile(
                         title: Text(
-                          "Tugas ${index + 1} Tekber",
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          task['name'],
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                         ),
-                        subtitle: const Text(
-                          "28 November 2024",
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.black54,
-                          ),
+                        subtitle: Text(
+                          "Deadline: ${deadline.toLocal().toString().split(' ')[0]}",
+                          style: const TextStyle(fontSize: 14, color: Colors.black54),
                         ),
                         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                        onTap: () {
-                          // Handle navigation to task detail
-                        },
                       ),
                     ),
                   );
@@ -81,15 +99,9 @@ class TaskListPage extends StatelessWidget {
       ),
       bottomNavigationBar: const SizedBox(
         height: 16,
-        child: Center(
-          child: Divider(
-            thickness: 2,
-            color: Colors.black12,
-            indent: 100,
-            endIndent: 100,
-          ),
-        ),
+        child: Center(child: Divider(thickness: 2, color: Colors.black12, indent: 100, endIndent: 100)),
       ),
     );
   }
 }
+
