@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
 import 'dart:convert'; // For JSON encoding/decoding
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart'; // Install uuid package for unique IDs
 
 class AddTaskPage extends StatefulWidget {
-  final Function onTaskAdded;  // Callback to notify task addition
+  final Function onTaskUpdated; // Callback for task update
+  final Map<String, dynamic>? task; // Task to edit
+  final bool isEditMode; // Determines add or edit mode
 
-  const AddTaskPage({Key? key, required this.onTaskAdded}) : super(key: key);
+  const AddTaskPage({
+    Key? key,
+    required this.onTaskUpdated,
+    this.task,
+    this.isEditMode = false,
+  }) : super(key: key);
 
   @override
   _AddTaskPageState createState() => _AddTaskPageState();
@@ -15,8 +23,23 @@ class _AddTaskPageState extends State<AddTaskPage> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController notesController = TextEditingController();
-
   DateTime? selectedDate;
+
+  @override
+void initState() {
+  super.initState();
+  if (widget.isEditMode && widget.task != null) {
+    nameController.text = widget.task!['name'];
+    descriptionController.text = widget.task!['description'];
+    notesController.text = widget.task!['notes'];
+
+    // Convert deadline String to DateTime
+    selectedDate = widget.task!['deadline'] is String
+        ? DateTime.parse(widget.task!['deadline'])
+        : widget.task!['deadline'];
+  }
+}
+
 
   @override
   void dispose() {
@@ -29,37 +52,66 @@ class _AddTaskPageState extends State<AddTaskPage> {
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: selectedDate ?? DateTime.now(),
       firstDate: DateTime(2020),
       lastDate: DateTime(2101),
     );
-    if (picked != null && picked != selectedDate)
-      setState(() {
-        selectedDate = picked;
-      });
+    if (picked != null && picked != selectedDate) {
+      if (picked.isBefore(DateTime.now().subtract(Duration(days: 1)))) {
+        // Show error if date is in the past
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Tanggal tidak boleh di masa lalu")),
+        );
+      } else {
+        setState(() {
+          selectedDate = picked;
+        });
+      }
+    }
   }
 
   void saveTask() async {
     if (nameController.text.isEmpty || selectedDate == null || descriptionController.text.isEmpty || notesController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Isi semua bagian")));
-    } else {
-      final prefs = await SharedPreferences.getInstance();
-      List<String> tasks = prefs.getStringList('tasks') ?? [];
-
-      Map<String, dynamic> taskData = {
-        'name': nameController.text,
-        'description': descriptionController.text,
-        'notes': notesController.text,
-        'deadline': selectedDate?.toIso8601String(),
-      };
-
-      String taskJson = jsonEncode(taskData);
-      tasks.add(taskJson);
-      await prefs.setStringList('tasks', tasks);
-
-      widget.onTaskAdded(); // Notify the parent to refresh tasks
-      Navigator.pop(context); // Go back to TaskListPage
+      return;
     }
+
+    final newTask = {
+      'id': widget.isEditMode && widget.task != null
+          ? widget.task!['id'] // Use existing ID in Edit Mode
+          : const Uuid().v4(), // Generate a new ID in Add Mode
+      'name': nameController.text,
+      'description': descriptionController.text,
+      'notes': notesController.text,
+      'deadline': selectedDate!.toIso8601String(),
+    };
+
+    final prefs = await SharedPreferences.getInstance();
+    List<String> tasks = prefs.getStringList('tasks') ?? [];
+
+    if (widget.isEditMode && widget.task != null) {
+      // Find the task by its unique ID
+      final int index = tasks.indexWhere((taskJson) {
+        final task = jsonDecode(taskJson);
+        return task['id'] == widget.task!['id']; // Match by ID
+      });
+
+      if (index != -1) {
+        tasks[index] = jsonEncode(newTask); // Update the task
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Tugas tidak ditemukan")));
+        return;
+      }
+    } else {
+      // Add Mode: Append the new task
+      tasks.add(jsonEncode(newTask));
+    }
+
+    // Save back to SharedPreferences
+    await prefs.setStringList('tasks', tasks);
+
+    widget.onTaskUpdated();
+    Navigator.pop(context);
   }
 
   @override
@@ -69,10 +121,10 @@ class _AddTaskPageState extends State<AddTaskPage> {
         backgroundColor: Colors.white,
         elevation: 0,
         automaticallyImplyLeading: false,
-        title: const Center(
+        title: Center(
           child: Text(
-            "Tambah Tugas",
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
+            widget.isEditMode ? "Edit Tugas" : "Tambah Tugas",
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
           ),
         ),
       ),
@@ -149,15 +201,9 @@ class _AddTaskPageState extends State<AddTaskPage> {
             maxLines: maxLines,
             decoration: const InputDecoration.collapsed(hintText: null),
             style: const TextStyle(fontSize: 16, color: Colors.black),
-            onTap: () {
-              if (controller.text.isNotEmpty) {
-                controller.clear();
-              }
-            },
           ),
         ),
       ],
     );
   }
 }
-
