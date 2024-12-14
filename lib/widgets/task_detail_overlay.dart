@@ -3,8 +3,14 @@ import 'package:flutter/material.dart';
 class TaskDetailOverlay extends StatelessWidget {
   final Map<String, dynamic> task;
   final VoidCallback onEdit;
+  final VoidCallback onDelete; // Menambahkan parameter onDelete
 
-  const TaskDetailOverlay({Key? key, required this.task, required this.onEdit}) : super(key: key);
+  const TaskDetailOverlay({
+    Key? key,
+    required this.task,
+    required this.onEdit,
+    required this.onDelete, // Menambahkan konstruktor untuk parameter onDelete
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +60,17 @@ class TaskDetailOverlay extends StatelessWidget {
           buildDetailSection("Deskripsi", task['description']),
           buildDetailSection("Note", task['notes']),
           const SizedBox(height: 20),
+          // Menambahkan tombol Delete
+          Center(
+            child: ElevatedButton(
+              onPressed: onDelete, // Menjalankan fungsi onDelete
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red, // Warna latar belakang tombol
+                foregroundColor: Colors.white, // Warna tulisan tombol
+              ),
+              child: const Text("Delete Task"),
+            ),
+          ),
         ],
       ),
     );

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:convert'; // For JSON encoding/decoding
+import 'dart:convert'; // Untuk encoding/decoding JSON
 import 'package:shared_preferences/shared_preferences.dart';
 import 'add_task_page.dart'; // Import AddTaskPage
 import '../widgets/task_detail_overlay.dart'; // Import TaskDetailOverlay
@@ -33,6 +33,19 @@ class _TaskListPageState extends State<TaskListPage> {
     });
   }
 
+  Future<void> _saveTasks() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> tasksJson = tasks.map((task) => jsonEncode(task)).toList();
+    await prefs.setStringList('tasks', tasksJson);
+  }
+
+  void _deleteTask(int index) async {
+    setState(() {
+      tasks.removeAt(index); // Menghapus task dari list
+    });
+    await _saveTasks(); // Menyimpan perubahan ke SharedPreferences
+  }
+
   void _viewTaskDetails(Map<String, dynamic> task) {
     showModalBottomSheet(
       context: context,
@@ -45,8 +58,12 @@ class _TaskListPageState extends State<TaskListPage> {
         return TaskDetailOverlay(
           task: task,
           onEdit: () {
-            Navigator.pop(context); // Close the overlay
-            _navigateToEditTask(task); // Open edit task page
+            Navigator.pop(context); // Tutup overlay
+            _navigateToEditTask(task); // Buka halaman edit task
+          },
+          onDelete: () {
+            Navigator.pop(context); // Tutup overlay
+            _showDeleteConfirmation(task); // Tampilkan dialog konfirmasi penghapusan
           },
         );
       },
@@ -58,11 +75,39 @@ class _TaskListPageState extends State<TaskListPage> {
       context,
       MaterialPageRoute(
         builder: (context) => AddTaskPage(
-          onTaskUpdated: _loadTasks, // Refresh task list after edit
+          onTaskUpdated: _loadTasks, // Refresh task list setelah edit
           task: task,
           isEditMode: true, // Pass edit mode flag
         ),
       ),
+    );
+  }
+
+  void _showDeleteConfirmation(Map<String, dynamic> task) {
+    int index = tasks.indexOf(task); // Mencari index task dalam list
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Hapus Tugas'),
+          content: const Text('Apakah Anda yakin ingin menghapus tugas ini?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Menutup dialog
+              },
+              child: const Text('Batal'),
+            ),
+            TextButton(
+              onPressed: () {
+                _deleteTask(index); // Hapus task dari list
+                Navigator.of(context).pop(); // Menutup dialog
+              },
+              child: const Text('Hapus'),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -88,7 +133,7 @@ class _TaskListPageState extends State<TaskListPage> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => AddTaskPage(
-                    onTaskUpdated: _loadTasks, // Refresh task list after adding a new task
+                    onTaskUpdated: _loadTasks, // Refresh task list setelah menambahkan task baru
                   ),
                 ),
               );

@@ -12,6 +12,7 @@ void main() {
 
 class ProductivityApp extends StatefulWidget {
   const ProductivityApp({super.key});
+
   @override
   _ProductivityAppState createState() => _ProductivityAppState();
 }
@@ -55,13 +56,13 @@ class ProductivityHomePage extends StatefulWidget {
 }
 
 class _ProductivityHomePageState extends State<ProductivityHomePage> {
-  String username = '';
+  String username = ''; // Variable to store the username
   final ValueNotifier<bool> _isPressed = ValueNotifier(false);
 
   @override
   void initState() {
     super.initState();
-    _loadUsername();
+    _loadUsername(); // Load username from SharedPreferences when the app starts
   }
 
   // Load username from SharedPreferences
@@ -80,14 +81,21 @@ class _ProductivityHomePageState extends State<ProductivityHomePage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
-            onPressed: () {
-              Navigator.pushNamed(context, '/settings'); // Navigate to Settings Page
+            onPressed: () async {
+              // Navigate to Settings Page and wait for the updated username
+              final updatedUsername = await Navigator.pushNamed(context, '/settings');
+
+              if (updatedUsername != null) {
+                setState(() {
+                  username = updatedUsername as String; // Update username with the returned value
+                });
+              }
             },
           ),
         ],
       ),
       body: SafeArea(
-        child: SingleChildScrollView( // Wrap the entire body in a scroll view
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -149,7 +157,6 @@ class _ProductivityHomePageState extends State<ProductivityHomePage> {
                 ),
               ),
               const SizedBox(height: 8),
-
               SizedBox(
                 child: Row(
                   children: [
@@ -298,16 +305,18 @@ class _ProductivityHomePageState extends State<ProductivityHomePage> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             const Text(
-                              "Yuk, catat produktivitasmu sehari-hari!",
-                              style: TextStyle(
-                                fontSize: 16,
-                              ),
-                              textAlign: TextAlign.left,
+                              "Lacak produktivitas Anda",
+                              style: TextStyle(fontSize: 16),
                             ),
                             const SizedBox(height: 16),
                             ElevatedButton(
                               onPressed: () {
-                                Navigator.pushNamed(context, '/timeTracker');
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => TimeTrackerPage(),
+                                  ),
+                                );
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.black,
@@ -318,35 +327,33 @@ class _ProductivityHomePageState extends State<ProductivityHomePage> {
                                 ),
                               ),
                               child: Row(
-                                mainAxisSize: MainAxisSize.min, // Menyesuaikan ukuran row agar tidak overflow
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(
-                                    Icons.access_time, // Ikon yang berkaitan dengan aktivitas
+                                    Icons.timer, // Ikon jam
                                     color: Colors.white,
-                                    size: 20, // Ukuran ikon
+                                    size: 20,
                                   ),
-                                  const SizedBox(width: 8), // Memberi jarak antara ikon dan teks
-                                  Flexible( // Membungkus Text dengan Flexible untuk memungkinkan teks pindah baris
+                                  const SizedBox(width: 8),
+                                  Flexible(
                                     child: Text(
-                                      "Activity Tracker",
-                                      style: TextStyle(
-                                        fontSize: 12, // Ukuran font yang lebih kecil
-                                      ),
-                                      overflow: TextOverflow.ellipsis, // Menambahkan ellipsis jika diperlukan
-                                      softWrap: true, // Membuat teks otomatis pindah ke baris baru jika diperlukan
-                                      maxLines: 2, // Membatasi maksimal dua baris
+                                      "Time Tracker",
+                                      overflow: TextOverflow.ellipsis,
+                                      softWrap: true,
+                                      style: TextStyle(fontSize: 12),
+                                      maxLines: 2,
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
+                            )
                           ],
                         ),
                       ),
                     ),
                   ),
                 ],
-              )
+              ),
             ],
           ),
         ),
