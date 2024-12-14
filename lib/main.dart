@@ -56,6 +56,7 @@ class ProductivityHomePage extends StatefulWidget {
 
 class _ProductivityHomePageState extends State<ProductivityHomePage> {
   String username = '';
+  final ValueNotifier<bool> _isPressed = ValueNotifier(false);
 
   @override
   void initState() {
@@ -148,11 +149,21 @@ class _ProductivityHomePageState extends State<ProductivityHomePage> {
                 ),
               ),
               const SizedBox(height: 8),
+
               SizedBox(
                 child: Row(
                   children: [
                     Expanded(
                       child: GestureDetector(
+                        onTapDown: (details) {
+                          _isPressed.value = true; // Set to true when pressed
+                        },
+                        onTapUp: (details) {
+                          _isPressed.value = false; // Set to false when released
+                        },
+                        onTapCancel: () {
+                          _isPressed.value = false; // Set to false if tap is canceled
+                        },
                         onTap: () {
                           Navigator.push(
                             context,
@@ -161,39 +172,50 @@ class _ProductivityHomePageState extends State<ProductivityHomePage> {
                             ),
                           );
                         },
-                        child: Container(
-                          width: 120, // Lebar container
-                          height: 120, // Tinggi container, sama dengan lebar agar berbentuk persegi
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.yellow[100],
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.add,
-                                size: 40,
-                                color: Colors.black,
-                              ),
-                              const SizedBox(height: 12), // Perkecil jarak antara ikon dan teks
-                              Text(
-                                "Tambahkan Reminder Tugas atau Catatan",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 14, // Perkecil ukuran font agar lebih proporsional
-                                  fontWeight: FontWeight.bold,
+                        child: ValueListenableBuilder<bool>(
+                          valueListenable: _isPressed,
+                          builder: (context, isPressed, child) {
+                            return AnimatedScale(
+                              scale: isPressed ? 0.9 : 1.0, // Apply animation for press effect
+                              duration: const Duration(milliseconds: 100),
+                              curve: Curves.easeInOut,
+                              child: Container(
+                                width: 120,
+                                height: 120,
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.yellow[100],
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.add,
+                                      size: 40,
+                                      color: Colors.black,
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      "Tambahkan Reminder Tugas atau Catatan",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
+                            );
+                          },
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
+
               const SizedBox(height: 24),
               Row(
                 children: [
