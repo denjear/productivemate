@@ -159,11 +159,11 @@ class _TaskListPageState extends State<TaskListPage> {
             itemBuilder: (BuildContext context) => [
               const PopupMenuItem<int>(
                 value: 0,
-                child: Text('Sort by Deadline'),
+                child: Text('Urutkan berdasarkan Deadline'),
               ),
               const PopupMenuItem<int>(
                 value: 1,
-                child: Text('Sort by Name'),
+                child: Text('Urutkan berdasarkan Nama'),
               ),
             ],
           ),
@@ -215,7 +215,7 @@ class _TaskListPageState extends State<TaskListPage> {
           );
         },
         child: const Icon(Icons.add),
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.yellow[100],
       ),
     );
   }

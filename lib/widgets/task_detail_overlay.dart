@@ -41,7 +41,7 @@ class TaskDetailOverlay extends StatelessWidget {
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                child: const Text("Back", style: TextStyle(fontSize: 16, color: Colors.black)),
+                child: const Text("Kembali", style: TextStyle(fontSize: 16, color: Colors.black)),
               ),
               const Text(
                 "Detail",
@@ -68,7 +68,7 @@ class TaskDetailOverlay extends StatelessWidget {
                 backgroundColor: Colors.red, // Warna latar belakang tombol
                 foregroundColor: Colors.white, // Warna tulisan tombol
               ),
-              child: const Text("Delete Task"),
+              child: const Text("Hapus Tugas"),
             ),
           ),
         ],
