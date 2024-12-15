@@ -13,6 +13,7 @@ class TaskListPage extends StatefulWidget {
 
 class _TaskListPageState extends State<TaskListPage> {
   List<Map<String, dynamic>> tasks = [];
+  bool isSortedByDeadline = true; // Flag to toggle sorting criteria
 
   @override
   void initState() {
@@ -30,6 +31,8 @@ class _TaskListPageState extends State<TaskListPage> {
         task['deadline'] = DateTime.parse(task['deadline']); // Parse deadline as DateTime
         return task;
       }).toList();
+
+      _sortTasks(); // Sort the tasks after loading
     });
   }
 
@@ -111,6 +114,25 @@ class _TaskListPageState extends State<TaskListPage> {
     );
   }
 
+  // Sort tasks by deadline or name
+  void _sortTasks() {
+    setState(() {
+      if (isSortedByDeadline) {
+        tasks.sort((a, b) {
+          final deadlineA = a['deadline'] as DateTime;
+          final deadlineB = b['deadline'] as DateTime;
+          return deadlineA.compareTo(deadlineB); // Sort by deadline ascending
+        });
+      } else {
+        tasks.sort((a, b) {
+          final nameA = a['name'] as String;
+          final nameB = b['name'] as String;
+          return nameA.compareTo(nameB); // Sort by name alphabetically
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -126,18 +148,24 @@ class _TaskListPageState extends State<TaskListPage> {
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.add, color: Colors.black),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => AddTaskPage(
-                    onTaskUpdated: _loadTasks, // Refresh task list setelah menambahkan task baru
-                  ),
-                ),
-              );
+          PopupMenuButton<int>(
+            icon: const Icon(Icons.more_vert, color: Colors.black),
+            onSelected: (int value) {
+              setState(() {
+                isSortedByDeadline = value == 0; // 0 -> Sort by deadline, 1 -> Sort by name
+                _sortTasks(); // Sort tasks based on the selected option
+              });
             },
+            itemBuilder: (BuildContext context) => [
+              const PopupMenuItem<int>(
+                value: 0,
+                child: Text('Sort by Deadline'),
+              ),
+              const PopupMenuItem<int>(
+                value: 1,
+                child: Text('Sort by Name'),
+              ),
+            ],
           ),
         ],
       ),
@@ -174,6 +202,20 @@ class _TaskListPageState extends State<TaskListPage> {
             );
           },
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddTaskPage(
+                onTaskUpdated: _loadTasks, // Refresh task list setelah menambahkan task baru
+              ),
+            ),
+          );
+        },
+        child: const Icon(Icons.add),
+        backgroundColor: Colors.black,
       ),
     );
   }
