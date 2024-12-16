@@ -305,7 +305,7 @@ class _ProductivityHomePageState extends State<ProductivityHomePage> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             const Text(
-                              "Lacak produktivitas Anda",
+                              "Yuk, lacak produktivitas harianmu!",
                               style: TextStyle(fontSize: 16),
                             ),
                             const SizedBox(height: 16),
